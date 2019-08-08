@@ -63,7 +63,7 @@ import Agda.Interaction.Options
 import Agda.Utils.Either
 import Agda.Utils.Except
   ( ExceptT
-  , MonadError(throwError)
+  , MonadError (throwError, catchError)
   , runExceptT
   )
 import Agda.Utils.Functor
@@ -283,8 +283,9 @@ coverageCheck f t cs = do
 --   case splitter
 isCovered :: QName -> [Clause] -> SplitClause -> TCM Bool
 isCovered f cs sc = do
-  CoverResult { coverMissingClauses = missing } <- cover f cs sc
-  return $ null missing
+    CoverResult { coverMissingClauses = missing } <- cover f cs sc
+    return $ null missing
+  `catchError` \ _ -> return False
 
 data CoverResult = CoverResult
   { coverSplitTree       :: SplitTree
